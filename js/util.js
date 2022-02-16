@@ -3,6 +3,7 @@ function resizeCanvas() {
     var elContainer = document.querySelector('.canvas-container');
     var elMemMenu = document.querySelector('.mem-menu-container')
     gElCanvas.width = elContainer.offsetWidth - 20
+    gElCanvas.height = elContainer.offsetHeight
         // console.dir(elContainer)
 
     //SOMTHING LIKE THIS SHOULD WORK, need to fix:
