@@ -1,41 +1,68 @@
 function _createLine(txt = 'defualt') {
     return {
-        txt,
-        size: 20,
+        txt: getRandomText(2),
+        txtWidth: 50,
+        size: getRandomIntInclusive(20, 40),
         align: 'left',
-        color: 'red',
+        color: getRandomColor(),
+        stroke: getRandomColor(), //null,
         posX: 50,
-        posY: 150,
+        posY: getRandomIntInclusive(100, 400),
+        // TODO change to something dynamic!!! :
+        // posY: getRandomIntInclusive(100, gElCanvas.height),
     }
 }
 
-function drawText(text, x, y, color, size) {
+function drawText(text, x, y, color, stroke, size) {
     // gCtx.font = '48px serif';
     // gCtx.fillText(text, x, y);
     // var currLine = gMeme.lines[gMeme.selectedLineIdx]
     // gCtx.save();
-    gCtx.lineWidth = 2;
-    gCtx.strokeStyle = color;
-    gCtx.fillStyle = 'black';
-    gCtx.font = size + 'px Arial';
+    gCtx.lineWidth = 1;
+    gCtx.strokeStyle = stroke;
+    gCtx.fillStyle = color;
+    gCtx.font = size + 'px Impact';
+    // gCtx.font = "Impact"
 
     gCtx.fillText(text, x, y);
     //there is something with limit for fillText - [, maxWidth]) check it after
-
-    gCtx.strokeText(text, x, y);
+    if (stroke !== '#FFFFFF')
+        gCtx.strokeText(text, x, y);
     // console.log(gCtx.measureText(text))
     // after print--> save
     // gCtx.restore()
 }
 
-function renderLinesOnCanvas() {
+function renderLinesOnMenu(delay = 10) {
+    var elMemMenu = document.querySelector('.lines-container')
+    var strHTML = ''
+    for (let i = 0; i < gMeme.lines.length; i++) {
+        strHTML +=
+            `<div class="line mem-line${i+1}">
+            <button class="btn" onclick="onIncreaseFont(this)">+</button>
+                <input type="text" name="input${i+1}" placeholder="Put your sentence here" required="">
+                <button class="btn" onclick="onDecreaseFont(this)">-</button>
+                <div class="line-colors-btns">
+                    <label>Text color <input type="color" name="line-color-${i+1}" value="#FFFFFF"></label>
+                    <label>Stroke color <input type="color" name="stroke-color-${i+1}" value="#FFFFFF"></label>
+                </div>
+            </div>`
+    }
+
+    elMemMenu.innerHTML = strHTML;
+
+}
+
+function renderLinesOnCanvas(delay = 10) {
     // console.log(gMeme.lines.length)
     for (let i = 0; i < gMeme.lines.length; i++) {
         var line = gMeme.lines[i]
-        drawText(line.txt, line.posX, line.posY, line.color, line.size)
-            // console.log('line.posY', line.posY)
         updateLineWidth(i, line.txt)
+            // console.log('line.posY', line.posY)
+
+        drawText(line.txt, line.posX, line.posY, line.color, line.stroke, line.size)
     }
+
 }
 
 function updateLineWidth(lineIdx, text) {
@@ -59,23 +86,55 @@ function isLineClicked(pos) {
     }
     return isLine;
 
+}
 
-    // var result = gMeme.lines.some((line) => {
-    //     var deltaX = line.posX + line.txtWidth;
-    //     var deltaY = line.size / 2;
-    //     // console.log('line', line)
-    //     // console.log('click pos: pos x:', pos.x, 'pos y', pos.y)
-    //     // console.log('line.posY', line.posY)
-    //     // console.log('deltaY', deltaY)
-    //     // console.log('deltaX', deltaX)
-    //     return ((pos.x >= line.posX && pos.x <= deltaX) && (pos.y >= line.posY - deltaY && pos.y <= line.posY + deltaY))
-    // })
-    // return result
+function getRandomLines(numOfLines) {
+    gMeme.lines = []
+    for (let i = 0; i < numOfLines; i++) {
+        addLine()
+
+    }
+}
+
+function addLine() {
+    var newLine = _createLine()
+    gMeme.lines.push(newLine)
+    renderLinesOnMenu()
+    addInputListeners()
+}
+
+function removeLine() {
+    gMeme.lines.pop()
+    renderLinesOnMenu()
+    addInputListeners()
+    renderImgAndLines()
+}
+
+// TODO remove mem from storage!
+
+function saveMem(image) {
+    gUserMems = loadFromStorage(STORAGE_KEY)
+    if (!gUserMems || !gUserMems.length) {
+        gUserMems = []
+    }
+    gUserMems.push(image)
+    _saveMemsToStorage()
+}
+
+function _saveMemsToStorage() {
+    saveToStorage(STORAGE_KEY, gUserMems)
+}
+
+function doShare() {
+
 }
 
 
+
+
+
 // ************************IMG SERVICE for mem.service.js!*****************
-function renderImg() {
+function renderImgAndLines() {
     var imgURL = getImgUrl()
         // gCtx.drawImage(img, 0, 0, gElCanvas.width, gElCanvas.height);
 
@@ -87,8 +146,19 @@ function renderImg() {
             // gElCanvas.height = this.naturalHeight;
             // gElCanvas.width = this.naturalWidth;
             gCtx.drawImage(this, 0, 0, gElCanvas.width, gElCanvas.height);
+            //FOR LINES RENDERING:
+            renderLinesOnCanvas()
             dataURL = gElCanvas.toDataURL(outputFormat);
             callback(dataURL);
+
+            // *****TO FIX - problem in this link
+            var elShare = document.querySelector('.share')
+            console.log('checkkkk', elShare)
+            elShare.outerHTML = `
+            <button class="btn" href="https://www.facebook.com/sharer/sharer.php?u=${dataURL}&t=${dataURL}" title="Share on Facebook" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${src}&t=${src}'); return false;">
+               Share   
+            </button>`
+
         };
         img.src = src;
         if (img.complete || img.complete === undefined) {
@@ -96,9 +166,10 @@ function renderImg() {
             img.src = src;
         }
     }
-
     toDataURL(imgURL,
         function(dataUrl) {
+            //for storage!
+            // gTempMems.push(dataUrl)
             // console.log('RESULT:', dataUrl)
         }
     )
@@ -107,6 +178,7 @@ function renderImg() {
 
 function getImgUrl() {
     //this for curr id, if user upload, return him something else
+
     return getImgById(gMeme.selectedImgId).url
 
 }
@@ -118,6 +190,6 @@ function getImgById(id) {
 // The next 2 functions handle IMAGE UPLOADING to img tag from file system: 
 function onImgInput(ev) {
     console.log(ev)
-    loadImageFromInput(ev, renderImg)
+    loadImageFromInput(ev, renderImgAndLines)
 }
 // \\************************IMG SERVICE*****************

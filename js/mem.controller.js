@@ -1,13 +1,9 @@
-// +++++++++++to delete+++++++
-var gCurrShape = 'triangle';
-var gLineColor = 'green';
-var gFillColor = 'orange'
-var gMouseEvs = ['mousedown', 'mousemove', 'mouseup']
-    // var lastEv
+'use strict'
 
-
-
-
+const STORAGE_KEY = 'memsDB';
+var gUserMems;
+// THIS IS FOR STORAGE
+var gTempMems = [];
 var gIsDragging = false;
 var gCurrEdit = 'text'
 var gElCanvas;
@@ -21,7 +17,7 @@ var gMeme = {
             txtWidth: 50,
             size: 20,
             align: 'left',
-            color: 'green',
+            color: '#FFFFFF',
             posX: 0,
             posY: 20,
         },
@@ -30,59 +26,115 @@ var gMeme = {
             txtWidth: 50,
             size: 32,
             align: 'left',
-            color: 'red',
+            color: '#FFFFFF',
             posX: 100,
             posY: 880,
         }
     ]
 }
 
-
-//TODO -  init for mem-page only-maybe!
-function init() {
+function initMem() {
     gElCanvas = document.getElementById('main-canvas');
     gCtx = gElCanvas.getContext('2d');
     resizeCanvas()
+    renderImgAndLines()
     addListeners()
-    renderImg()
         //render lines (2 in begining)
 }
 
-//TODO
-function onAddInput() {
-    gMeme.lines.push(_createLine)
-        // TODO ->renderLinesOnMenu()
+function onSaveMem() {
+    var image = gElCanvas.toDataURL('image/jpeg')
+    saveMem(image)
+}
+
+
+function onDownload(elLink) {
+    var imgContent = gElCanvas.toDataURL('image/jpeg')
+    elLink.href = imgContent
+
+    // var elShare = document.querySelector('.share')
+    // console.log('checkkkk', elShare)
+    // elShare.innerHTML = `
+    // <a class="btn" href="https://www.facebook.com/sharer/sharer.php?u=${dataURL}&t=${dataURL}" title="Share on Facebook" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${src}&t=${src}'); return false;">
+    //    Share   
+    // </a>`
+
+
+
+}
+
+function onAddLine() {
+    addLine()
+}
+
+function onRemoveLine() {
+    removeLine()
 }
 
 function onUpdateLineValue(e) {
-    renderImg()
+
     var lineIdx = e.target.name
     lineIdx = lineIdx.replace("input", "") - 1
     gMeme.selectedLineIdx = lineIdx
     var text = e.target.value;
-    gMeme.lines[lineIdx].txt = text
-        //I know its not the best solution but it the best i can thought of
-    setTimeout(() => (renderLinesOnCanvas()), 1);
+    var line = gMeme.lines[lineIdx]
+
+    //TODO - FIX measurment, check the canvas size. check if the measure text is working!
+    if (gCtx.measureText(text).width < gElCanvas.width - line.posX) {
+        gMeme.lines[lineIdx].txt = text
+        renderImgAndLines()
+    }
 }
 
 function onIncreaseFont(el) {
-    renderImg()
     var lineIdx = el.parentElement.className
     lineIdx = lineIdx.replace("line mem-line", "") - 1
     gMeme.selectedLineIdx = lineIdx
     gMeme.lines[lineIdx].size += 2
-    setTimeout(() => (renderLinesOnCanvas()), 1);
+    renderImgAndLines()
 }
 
 function onDecreaseFont(el) {
-    renderImg()
     var lineIdx = el.parentElement.className
     lineIdx = lineIdx.replace("line mem-line", "") - 1
     gMeme.selectedLineIdx = lineIdx
     gMeme.lines[lineIdx].size -= 2
-    setTimeout(() => (renderLinesOnCanvas()), 1);
+    renderImgAndLines()
 }
 
+function onColorChange(e) {
+
+    var lineIdx = e.target.name
+    lineIdx = lineIdx.replace("line-color-", "") - 1
+    gMeme.selectedLineIdx = lineIdx
+    var textColor = e.target.value;
+    gMeme.lines[lineIdx].color = textColor
+        //I know its not the best solution but it the best i can thought of
+    renderImgAndLines()
+}
+
+function onStrokeChange(e) {
+    var lineIdx = e.target.name
+    lineIdx = lineIdx.replace("stroke-color-", "") - 1
+    gMeme.selectedLineIdx = lineIdx
+    var strokeColor = e.target.value;
+    gMeme.lines[lineIdx].stroke = strokeColor
+        //I know its not the best solution but it the best i can thought of
+    renderImgAndLines()
+}
+
+function onChangeLine(ev) {
+    // console.log('ev', ev)
+    var lineIdx = gMeme.selectedLineIdx
+    const elCurrLine = document.querySelector(`.mem-line${lineIdx + 1}`);
+    elCurrLine.classList.remove('focus')
+    console.log(elCurrLine)
+    if (gMeme.lines.length - 1 > lineIdx) lineIdx++
+        else lineIdx = 0;
+    gMeme.selectedLineIdx = lineIdx
+    const elNewLine = document.querySelector(`.mem-line${lineIdx + 1}`);
+    elNewLine.classList.add('focus')
+}
 
 function addListeners() {
     addMouseListeners()
@@ -91,14 +143,20 @@ function addListeners() {
 
     window.addEventListener('resize', () => {
         resizeCanvas()
-            // renderCanvas()
+        renderImgAndLines()
     })
 }
 
 function addInputListeners() {
     for (let i = 0; i < gMeme.lines.length; i++) {
-        const elInput = document.querySelector(`[name="input${i+1}"]`);
+        console.log('check', i)
+        const elInput = document.querySelector(`[name="input${i + 1}"]`);
         elInput.addEventListener('input', onUpdateLineValue);
+        const elTextColor = document.querySelector(`[name="line-color-${i + 1}"]`)
+        elTextColor.addEventListener('input', onColorChange);
+
+        const elStrokeColor = document.querySelector(`[name="stroke-color-${i + 1}"]`)
+        elStrokeColor.addEventListener('input', onStrokeChange);
     }
 }
 
@@ -109,10 +167,18 @@ function addMouseListeners() {
 }
 
 function onDown(ev) {
-    const pos = getEvPos(ev)
+    const pos = ev.touches ? getTouchEvPos(ev) : getEvPos(ev)
 
-    console.log('onDown()');
-    console.log(isLineClicked(pos))
+    // console.log(ev);
+    // console.log(ev.touches);
+    // console.log('check cirds', ev.view.Hammer.DIRECTION_VERTICAL)
+    console.log('pos', pos);
+    // console.log('isLineClicked?', isLineClicked(pos))
+    // const hmrContainer = new Hammer(gElCanvas);
+    // hmrContainer.on('panleft panright', (ev) => {
+    //     console.log('checkkkkkk', ev)
+    // })
+
     if (!isLineClicked(pos)) return
     setLineDrag(true)
         // gStartPos = pos
@@ -126,15 +192,46 @@ function setLineDrag(isDrag) {
 
 function onMove(ev) {
     // console.log('onMove()');
+    // ev.preventDefault()
     const line = gMeme.lines[gMeme.selectedLineIdx]
     if (gIsDragging) {
-        const pos = getEvPos(ev)
+        const pos = ev.touches ? getTouchEvPos(ev) : getEvPos(ev)
         const dx = pos.x - line.posX
         const dy = pos.y - line.posY
         line.posX = pos.x
         line.posY = pos.y
-        renderImg()
-        setTimeout(() => (renderLinesOnCanvas()), 1);
+            //for touch inner function:
+            // if (ev.values)
+        console.log('checkkkkkk', ev)
+
+        function doTinder() {
+
+            const hmrContainer = new Hammer(gElCanvas);
+
+            hmrContainer.on('panleft panright', (ev) => {
+                // if (ev.target.nodeName !== 'IMG') return;
+
+                line.posX = ev.target.offsetWidth
+                line.posY = ev.target.offsetTop
+
+
+                // var side = (ev.type === 'panright') ? 'Right' : 'Left';
+                // var txt = (ev.type === 'panright') ? 'Yes!' : 'Nope...';
+
+                // ev.target.classList.add('animated', `fadeOut${side}`)
+
+                // var elFeedback = elContainer.querySelector('h1');
+                // elFeedback.innerText = txt;
+                // elFeedback.classList.add('animated', `tada`)
+                // setTimeout(() => {
+                //     elContainer.querySelector('h1').innerHTML = '&nbsp;';
+                //     elFeedback.classList.remove('animated', `tada`)
+                // }, 1000)
+            });
+        }
+        doTinder()
+
+        renderImgAndLines()
     }
 }
 
@@ -144,11 +241,30 @@ function onUp() {
     document.body.style.cursor = 'grab'
 }
 
+function getTouchEvPos(ev) {
+    const line = gMeme.lines[gMeme.selectedLineIdx]
+        // var pos = {
+        //     x: line.posX + ev.target.deltaX,
+        //     y: line.posY + ev.target.offsetWidth
+        // }
+    console.log('from touch func', ev)
+    ev.preventDefault()
+    ev = ev.changedTouches[0]
+    var pos = {
+        x: ev.pageX - ev.target.offsetLeft - ev.target.clientLeft,
+        y: ev.pageY - ev.target.offsetTop - ev.target.clientTop
+    }
+
+}
+
 function getEvPos(ev) {
+
     var pos = {
         x: ev.offsetX,
         y: ev.offsetY
     }
+
+
 
 
     // think its for touch:
@@ -169,147 +285,14 @@ function getEvPos(ev) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function clearCanvas() {
-    // gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
-    // You may clear part of the canvas
-    gCtx.clearRect(0, 0, gElCanvas.width, gElCanvas.height)
-}
-
-
-
-function renderColors() {
-    gFillColor = document.querySelector('[name="fill-color"]').value
-    gLineColor = document.querySelector('[name="line-color"]').value
-
-}
-
-
-
-
-
 function addTouchListeners() {
     gElCanvas.addEventListener('touchstart', onDown)
     gElCanvas.addEventListener('touchmove', onMove)
+    gElCanvas.addEventListener('hold', onMove)
+    gElCanvas.addEventListener('swipe', onMove)
     gElCanvas.addEventListener('touchend', onUp)
 }
 
-// function onDown(ev) {
-//     renderColors()
-//     draw(ev)
-// }
-
-// function onMove(ev) {
-//     // draw(ev)
-//     drawLine(ev.offsetX, ev.offsetY, ev);
-// }
-
-
-// function onUp(ev) {
-//     draw(ev)
-// }
-
-function draw(ev) {
-    const offsetX = ev.offsetX;
-    const offsetY = ev.offsetY;
-
-    switch (gCurrShape) {
-        case 'triangle':
-            drawTriangle(offsetX, offsetY);
-            break;
-        case 'rect':
-            drawRect(offsetX, offsetY);
-            break;
-        case 'circle':
-            drawCircle(offsetX, offsetY);
-            break;
-        case 'line':
-            drawLine(offsetX, offsetY, ev);
-            break;
-    }
-}
-
-function setShape(shape) {
-    gCurrShape = shape;
-}
-
-
-
-// function drawLine(x, y, xEnd = 250, yEnd = 250) {
-function drawLine(x, y, ev) {
-    //ASk is it the best way to render??????
-    if (ev.type === 'mousedown') {
-        isDragging = true;
-        gCtx.beginPath();
-        gCtx.moveTo(x, y); // 10 10
-        //TODO user choose!
-        gCtx.lineWidth = 2
-    } else if (ev.type === 'mousemove' && isDragging) {
-        gCtx.lineTo(x, y); // 11 11
-        gCtx.stroke();
-        // gCtx.beginPath();
-        gCtx.moveTo(x, y); // 33 33
-    } else {
-        gCtx.strokeStyle = gLineColor;
-        gCtx.stroke();
-        gCtx.closePath();
-        isDragging = false
-    }
-}
-
-function drawRect(x, y) {
-    gCtx.beginPath();
-    gCtx.rect(x, y, 150, 150);
-    gCtx.fillStyle = gFillColor;
-    gCtx.fillRect(x, y, 150, 150);
-    gCtx.strokeStyle = gLineColor
-    gCtx.stroke();
-}
-
-function drawTriangle(x, y) {
-    //if the user want to draw all we can use global var for number of clicks for triangle
-    gCtx.beginPath();
-    gCtx.lineWidth = 2;
-    gCtx.moveTo(x, y);
-    gCtx.lineTo(130, 330);
-    gCtx.lineTo(50, 370);
-    gCtx.closePath();
-    // gCtx.lineTo(x, y);
-    // gCtx.fillStyle = 'purple';
-    // gCtx.fill();
-    gCtx.strokeStyle = gLineColor
-    gCtx.stroke();
-    gCtx.closePath();
-}
-
-function drawCircle(x, y) {
-    gCtx.beginPath();
-    gCtx.lineWidth = 6;
-    gCtx.arc(x, y, 100, 0, 2 * Math.PI);
-    gCtx.strokeStyle = gLineColor
-    gCtx.stroke();
-    gCtx.fillStyle = gFillColor;
-    gCtx.fill();
-}
 
 
 // -------------------------images uplaod and download-------------------

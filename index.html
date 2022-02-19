@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/style.css">
+    <title>proj meme</title>
+</head>
+
+<header>
+    <img class="logo" src="img/logo.png" alt="" srcset="">
+    <div class="main-menu-btns">
+        <button class="btn" onclick="onGalleryClick()">Gallery</button>
+        <button class="btn" onclick="onImFlexible()">I'm flexible</button>
+    </div>
+    <div class="search">
+        <h3>search</h3>
+        <input onchange="onSetFilter(this.value)" type="text" list="filters">
+        <datalist id="filters">
+        <option>ALL</option>
+        <option>USER</option>
+        <option>Active</option>
+</datalist>
+    </div>
+
+
+</header>
+<br>
+
+<body onload="init()">
+
+    <div class="mem-main-container hidden">
+        <div class="canvas-container">
+            <!-- //TODO change style! -->
+            <canvas id="main-canvas" height="400" width="400"></canvas>
+            <!-- <canvas id="main-canvas" height="400" width="400" onclick="draw(event)"></canvas> -->
+        </div>
+        <div class="mem-menu-container">
+            <div class="lines-container">
+                <div class="line mem-line1">
+                    <input type="text" name="input1" placeholder="Put your sentence here" required="">
+                    <br>
+                    <!-- size +- color etc... -->
+                    <button class="btn" onclick="onIncreaseFont(this)">+</button>
+                    <button class="btn" onclick="onDecreaseFont(this)">-</button>
+                    <div class="colors-btns?">
+                        <label>Set Text color <input type="color" name="line-color-1" value="#FFFFFF"></label>
+                        <label>Stroke color <input type="color" name="stroke-color-${i+1}" value="#FFFFFF"></label>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="main-btns">
+                <button class="btn" onclick="onChangeLine(this)">Change line</button>
+                <button class="btn" onclick="onRemoveLine()">Remove line -</button>
+                <button class="btn" onclick="onAddLine()">Add line +</button>
+                </br>
+                <button class="btn" onclick="onSaveMem()">save to storage</button>
+                <a href="#" onclick="onDownload(this)" download="my-img.jpg">
+                    <button class="btn">Download</button>
+                </a>
+                <button class="btn" href="https://www.facebook.com/sharer/sharer.php?u=${dataURL}&t=${dataURL}" title="Share on Facebook" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${src}&t=${src}'); return false;">
+                    Share   
+                 </button>`
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <div class="gallery-container">
+        <div class="grid-container">
+            <div class="item1">
+                <a class="image-link" href="#portfolioModal3">
+                    <img class="img-fluid" src="meme-imgs-square/10.jpg">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="lib/hammerjs.js"></script>
+    <script src="js/main-menu.js"></script>
+    <script src="js/main-gallery.js"></script>
+    <script src="js/mem.controller.js"></script>
+    <script src="js/upload-service.js"></script>
+    <script src="js/services/mem.service.js"></script>
+    <script src="js/util.js"></script>
+</body>
+
+</html>
