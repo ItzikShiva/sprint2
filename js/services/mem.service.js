@@ -154,7 +154,7 @@ function renderImgAndLines() {
             // *****TO FIX - problem in this link
             var elShare = document.querySelector('.share')
             console.log('checkkkk', elShare)
-            elShare.outerHTML = `
+            elShare = `
             <button class="btn" href="https://www.facebook.com/sharer/sharer.php?u=${dataURL}&t=${dataURL}" title="Share on Facebook" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${src}&t=${src}'); return false;">
                Share   
             </button>`

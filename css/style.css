@@ -42,7 +42,8 @@ h3 {
     gap: 10px;
 }
 
-@media (max-width: 980px) {
+
+/* @media (max-width: 980px) {
     .mem-main-container {
         flex-direction: column;
     }
@@ -55,13 +56,14 @@ h3 {
     .mem-main-container {
         flex-direction: row;
     }
-}
+} */
 
 .canvas-container {
     display: block;
     margin: 2%;
     width: 60%;
-    height: 90%;
+    /* height: 90%; */
+    /* height: 80rem; */
 }
 
 canvas {
