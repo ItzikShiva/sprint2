@@ -7,7 +7,7 @@ function _createLine(txt = 'defualt') {
         color: getRandomColor(),
         stroke: getRandomColor(), //null,
         posX: 50,
-        posY: getRandomIntInclusive(100, 400),
+        posY: getRandomIntInclusive(100, gElCanvas.height / 2),
         // TODO change to something dynamic!!! :
         // posY: getRandomIntInclusive(100, gElCanvas.height),
     }
@@ -100,6 +100,7 @@ function addLine() {
     var newLine = _createLine()
     gMeme.lines.push(newLine)
     renderLinesOnMenu()
+    renderLinesOnCanvas()
     addInputListeners()
 }
 

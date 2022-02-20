@@ -28,7 +28,7 @@ var gMeme = {
             align: 'left',
             color: '#FFFFFF',
             posX: 100,
-            posY: 880,
+            posY: 300,
         }
     ]
 }
@@ -204,32 +204,32 @@ function onMove(ev) {
             // if (ev.values)
         console.log('checkkkkkk', ev)
 
-        function doTinder() {
+        // function doTinder() {
 
-            const hmrContainer = new Hammer(gElCanvas);
+        //     const hmrContainer = new Hammer(gElCanvas);
 
-            hmrContainer.on('panleft panright', (ev) => {
-                // if (ev.target.nodeName !== 'IMG') return;
+        //     hmrContainer.on('panleft panright', (ev) => {
+        //         // if (ev.target.nodeName !== 'IMG') return;
 
-                line.posX = ev.target.offsetWidth
-                line.posY = ev.target.offsetTop
+        //         line.posX = ev.target.offsetWidth
+        //         line.posY = ev.target.offsetTop
 
 
-                // var side = (ev.type === 'panright') ? 'Right' : 'Left';
-                // var txt = (ev.type === 'panright') ? 'Yes!' : 'Nope...';
+        //         // var side = (ev.type === 'panright') ? 'Right' : 'Left';
+        //         // var txt = (ev.type === 'panright') ? 'Yes!' : 'Nope...';
 
-                // ev.target.classList.add('animated', `fadeOut${side}`)
+        //         // ev.target.classList.add('animated', `fadeOut${side}`)
 
-                // var elFeedback = elContainer.querySelector('h1');
-                // elFeedback.innerText = txt;
-                // elFeedback.classList.add('animated', `tada`)
-                // setTimeout(() => {
-                //     elContainer.querySelector('h1').innerHTML = '&nbsp;';
-                //     elFeedback.classList.remove('animated', `tada`)
-                // }, 1000)
-            });
-        }
-        doTinder()
+        //         // var elFeedback = elContainer.querySelector('h1');
+        //         // elFeedback.innerText = txt;
+        //         // elFeedback.classList.add('animated', `tada`)
+        //         // setTimeout(() => {
+        //         //     elContainer.querySelector('h1').innerHTML = '&nbsp;';
+        //         //     elFeedback.classList.remove('animated', `tada`)
+        //         // }, 1000)
+        //     });
+        // }
+        // doTinder()
 
         renderImgAndLines()
     }
