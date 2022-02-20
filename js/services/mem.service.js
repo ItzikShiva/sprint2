@@ -7,9 +7,7 @@ function _createLine(txt = 'defualt') {
         color: getRandomColor(),
         stroke: getRandomColor(), //null,
         posX: 50,
-        posY: getRandomIntInclusive(100, gElCanvas.height / 2),
-        // TODO change to something dynamic!!! :
-        // posY: getRandomIntInclusive(100, gElCanvas.height),
+        posY: getRandomIntInclusive(100, gElCanvas ? gElCanvas.height / 2 : 300),
     }
 }
 
@@ -36,6 +34,7 @@ function drawText(text, x, y, color, stroke, size) {
 function renderLinesOnMenu(delay = 10) {
     var elMemMenu = document.querySelector('.lines-container')
     var strHTML = ''
+
     for (let i = 0; i < gMeme.lines.length; i++) {
         strHTML +=
             `<div class="line mem-line${i+1}">
@@ -48,27 +47,22 @@ function renderLinesOnMenu(delay = 10) {
                 </div>
             </div>`
     }
-
     elMemMenu.innerHTML = strHTML;
-
 }
 
-function renderLinesOnCanvas(delay = 10) {
-    // console.log(gMeme.lines.length)
+function renderLinesOnCanvas() {
     for (let i = 0; i < gMeme.lines.length; i++) {
         var line = gMeme.lines[i]
-        updateLineWidth(i, line.txt)
-            // console.log('line.posY', line.posY)
-
-        drawText(line.txt, line.posX, line.posY, line.color, line.stroke, line.size)
+            //the if is for the first time i'm flexible
+        if (gCtx !== undefined) {
+            updateLineWidth(i, line.txt)
+            drawText(line.txt, line.posX, line.posY, line.color, line.stroke, line.size)
+        }
     }
-
 }
 
 function updateLineWidth(lineIdx, text) {
-    // console.log(gCtx.measureText(text))
     gMeme.lines[lineIdx].txtWidth = gCtx.measureText(text).width
-        // gCtx.measureText(text)
 }
 
 //return if clicked & change the curr index if clicked
@@ -76,23 +70,23 @@ function isLineClicked(pos) {
     var isLine = false;
     for (let i = 0; i < gMeme.lines.length; i++) {
         var line = gMeme.lines[i]
-        var deltaX = line.posX + line.txtWidth;
+        var deltaX = line.posX + line.txtWidth * 2;
         var deltaY = line.size / 2;
         isLine = ((pos.x >= line.posX && pos.x <= deltaX) && (pos.y >= line.posY - deltaY && pos.y <= line.posY + deltaY))
+            // console.log('pos.x', pos.x, 'pos.y', pos.y, 'line.posX', line.posX, 'line.posY', line.posY, 'deltaX', deltaX, 'deltaY', deltaY)
+            // console.log('line:', i, 'is line?:', isLine)
         if (isLine) {
             gMeme.selectedLineIdx = i;
             break;
         }
     }
     return isLine;
-
 }
 
 function getRandomLines(numOfLines) {
     gMeme.lines = []
     for (let i = 0; i < numOfLines; i++) {
         addLine()
-
     }
 }
 
@@ -127,12 +121,34 @@ function _saveMemsToStorage() {
 }
 
 function doShare() {
-
+    // TODO
 }
 
-
-
-
+function resetGMeme() {
+    gMeme = {
+        selectedImgId: 2,
+        selectedLineIdx: 0,
+        lines: [{
+                txt: 'I sometimes eat Falafel',
+                txtWidth: 50,
+                size: 20,
+                align: 'left',
+                color: '#FFFFFF',
+                posX: 0,
+                posY: 20,
+            },
+            {
+                txt: 'bottom line',
+                txtWidth: 50,
+                size: 32,
+                align: 'left',
+                color: '#FFFFFF',
+                posX: 100,
+                posY: 300,
+            }
+        ]
+    }
+}
 
 // ************************IMG SERVICE for mem.service.js!*****************
 function renderImgAndLines() {
@@ -151,14 +167,14 @@ function renderImgAndLines() {
             renderLinesOnCanvas()
             dataURL = gElCanvas.toDataURL(outputFormat);
             callback(dataURL);
-
             // *****TO FIX - problem in this link
             var elShare = document.querySelector('.share')
-            console.log('checkkkk', elShare)
+                // console.log('checkkkk', elShare)
             elShare = `
-            <button class="btn" href="https://www.facebook.com/sharer/sharer.php?u=${dataURL}&t=${dataURL}" title="Share on Facebook" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${src}&t=${src}'); return false;">
-               Share   
-            </button>`
+                <button class="btn" href="https://www.facebook.com/sharer/sharer.php?u=${dataURL}&t=${dataURL}" title="Share on Facebook" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${imgURL}&t=${imgURL}'); return false;">
+                   Share   
+                </button>`
+
 
         };
         img.src = src;
@@ -166,9 +182,11 @@ function renderImgAndLines() {
             img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
             img.src = src;
         }
+
     }
     toDataURL(imgURL,
         function(dataUrl) {
+
             //for storage!
             // gTempMems.push(dataUrl)
             // console.log('RESULT:', dataUrl)

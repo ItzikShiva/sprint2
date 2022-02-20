@@ -1,0 +1,70 @@
+/*
+@media (max-width: 980px) {
+    .mem-main-container {
+        flex-direction: column;
+    }
+    .canvas {
+        height: 60%;
+    }
+}
+להעפיל המבורגר!
+
+@media (min-width: 980px) {
+    .mem-main-container {
+        flex-direction: row;
+    }
+} */
+
+@media (max-width: 980px) {
+    .burger {
+        display: flex;
+    }
+    .main-menu-btns {
+        display: none;
+    }
+    .main-menu-btns {
+        background-color: var(--clr1);
+        border-color: var(--clr4);
+        border: 0px;
+        /* border: solid 0.5px; */
+        border-radius: 20px;
+        position: relative;
+        flex-direction: column;
+        padding-right: 20px !important;
+        padding-top: 10px;
+    }
+    /* .btn-gallery {
+        display: none;
+    }
+    .btn-flexible {
+        display: none;
+    }
+    .search {
+        display: none;
+    } */
+    /* .btn-menu {
+        display: block;
+        width: fit-content;
+        align-self: center;
+    } */
+}
+
+@media (min-width: 980px) {
+    .btn-menu {
+        display: none;
+        width: fit-content;
+        align-self: center;
+    }
+    .btn-gallery {
+        display: block important;
+    }
+    .btn-flexible {
+        display: block;
+    }
+    .search {
+        display: block;
+    }
+    .burger {
+        display: none;
+    }
+}

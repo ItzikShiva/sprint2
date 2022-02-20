@@ -1,5 +1,4 @@
 var gKeywordSearchCountMap = { 'funny': 12, 'cat': 16, 'baby': 2 };
-//TODO - gImgs by loop!! function getImages()
 var gImgs
 var gKeyWords
 
@@ -10,6 +9,19 @@ function onGalleryClick() {
     elMems.classList.add("hidden")
     elGallery = document.querySelector(".gallery-container")
     elGallery.classList.remove("hidden")
+}
+
+function onImFlexible() {
+    gMeme.selectedImgId = getRandomIntInclusive(1, gImgs.length);
+    elMems = document.querySelector(".mem-main-container")
+    elMems.classList.remove("hidden")
+    elGallery = document.querySelector(".gallery-container")
+    elGallery.classList.add("hidden")
+    getRandomLines(getRandomIntInclusive(1, 2))
+    initMem()
+    renderLinesOnMenu()
+    renderLinesOnCanvas()
+    addInputListeners()
 }
 
 function updateImageModel() {
@@ -43,19 +55,6 @@ function renderKeyWords() {
     elFilters.innerHTML = strHTML
 }
 
-function onImFlexible() {
-    gMeme.selectedImgId = getRandomIntInclusive(1, gImgs.length);
-    elMems = document.querySelector(".mem-main-container")
-    elMems.classList.remove("hidden")
-    elGallery = document.querySelector(".gallery-container")
-    elGallery.classList.add("hidden")
-    getRandomLines(getRandomIntInclusive(1, 2))
-    initMem()
-    renderLinesOnMenu()
-    renderLinesOnCanvas()
-    addInputListeners()
-}
-
 function onSetFilter(filterBy) {
     setFilter(filterBy)
     renderGallery()
@@ -76,4 +75,18 @@ function getImagesForDisplay() {
         if (currImage.keywords.some((currKeyword) => currKeyword === gFilterBy)) images.push(currImage)
     }
     return images
+}
+
+function toggleMenu(ev) {
+    var elBtnPointer = ev.nextElementSibling;
+
+    while (elBtnPointer) {
+        elBtnPointer.classList.toggle('hidden')
+        elBtnPointer = elBtnPointer.nextElementSibling
+    }
+
+    var elMenu = ev.parentElement
+    if (elMenu.style.border === '0px') {
+        elMenu.style.border = 'solid 0.5px'
+    } else elMenu.style.border = '0px'
 }

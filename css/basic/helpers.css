@@ -1,0 +1,15 @@
+/* ===================helpers============= */
+
+.focus {
+    background-color: bisque;
+    width: 95%;
+    border-radius: 30px;
+}
+
+.hidden {
+    display: none;
+}
+
+.flex {
+    display: flex;
+}
